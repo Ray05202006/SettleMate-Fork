@@ -1,3 +1,4 @@
+require('./load-env');
 const { execSync } = require('child_process');
 
 const url = process.env.DATABASE_URL || '';
@@ -8,5 +9,10 @@ console.log(`[postbuild] DB push with schema: ${schema}`);
 try {
   execSync(`npx prisma db push --schema=${schema} --skip-generate`, { stdio: 'inherit' });
 } catch {
-  process.exit(0); // 與原本 || true 行為一致
+  if (isPg) {
+    // Surface real schema-sync failures in production rather than hiding them.
+    process.exit(1);
+  }
+  // SQLite in local dev: tolerate failures (matches original || true behaviour).
+  process.exit(0);
 }

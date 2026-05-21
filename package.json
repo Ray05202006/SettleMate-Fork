@@ -8,9 +8,9 @@
     "postbuild": "node scripts/postbuild.js",
     "start": "next start",
     "lint": "eslint",
-    "db:push": "prisma db push",
-    "db:generate": "prisma generate",
-    "db:studio": "prisma studio"
+    "db:push": "node scripts/prisma.js db push",
+    "db:generate": "node scripts/prisma.js generate",
+    "db:studio": "node scripts/prisma.js studio"
   },
   "dependencies": {
     "@prisma/client": "^5.22.0",
