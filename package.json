@@ -4,10 +4,13 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "prisma generate && next build",
-    "postbuild": "prisma db push --skip-generate || true",
+    "build": "node scripts/build.js",
+    "postbuild": "node scripts/postbuild.js",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "db:push": "prisma db push",
+    "db:generate": "prisma generate",
+    "db:studio": "prisma studio"
   },
   "dependencies": {
     "@prisma/client": "^5.22.0",
