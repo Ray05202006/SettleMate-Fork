@@ -1,4 +1,4 @@
-// Split Bill App - Prisma Schema
+// Split Bill App - Prisma Schema (PostgreSQL / Production)
 // 朋友群分帳工具的數據庫結構
 
 generator client {
@@ -6,7 +6,7 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
@@ -39,7 +39,7 @@ model Member {
 
   // 作為支出者的記錄
   expensesPaid Expense[] @relation("paidBy")
-  
+
   // 作為分攤者的記錄
   expenseParticipations ExpenseParticipant[]
 
