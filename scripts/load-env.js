@@ -1,10 +1,12 @@
-// Load .env then .env.local (Next.js convention) into process.env.
+// Load .env then .env.local into process.env.
 // Shell-level env vars are never overwritten; .env.local overrides .env.
+// Only these two files are loaded — Next.js handles NODE_ENV-specific files
+// (.env.development, .env.production, etc.) during next dev / next build.
 const fs = require('fs');
 const path = require('path');
 
 const root = process.cwd();
-// Snapshot keys that already exist in the shell environment — protect these.
+// Snapshot keys already present in the shell — these are never overwritten.
 const shellKeys = new Set(Object.keys(process.env));
 
 for (const file of ['.env', '.env.local']) {
@@ -18,7 +20,7 @@ for (const file of ['.env', '.env.local']) {
       const key = trimmed.slice(0, eq).trim();
       let val = trimmed.slice(eq + 1).trim();
       if (/^["'].*["']$/.test(val)) val = val.slice(1, -1);
-      // Never overwrite a shell env var, but allow later files to override earlier ones.
+      // Protect original shell env vars; allow later files to override earlier ones.
       if (!shellKeys.has(key)) process.env[key] = val;
     }
   } catch {

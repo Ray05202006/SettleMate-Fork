@@ -1,22 +1,18 @@
-// Uses `prisma db push` (schema sync / prototyping mode) — NOT `prisma migrate deploy`.
-// This is intentional: the existing prisma/migrations/ files contain SQLite-specific SQL
-// and must not be applied to PostgreSQL. db push syncs the schema directly without
-// touching migration history, which is the correct approach here.
-require('./load-env');
+// Uses `prisma db push` (schema sync) — NOT `prisma migrate deploy`.
+// Intentional: prisma/migrations/ contains SQLite-specific SQL that must not
+// be applied to PostgreSQL. db push syncs schema state without migration history.
 const { execSync } = require('child_process');
-
-const url = process.env.DATABASE_URL || '';
-const isPg = url.startsWith('postgresql://') || url.startsWith('postgres://');
-const schema = isPg ? 'prisma/schema.postgresql.prisma' : 'prisma/schema.prisma';
+const { schema, isPg } = require('./prisma-schema');
 
 console.log(`[postbuild] db push with schema: ${schema}`);
 try {
   execSync(`npx prisma db push --schema=${schema} --skip-generate`, { stdio: 'inherit' });
-} catch {
-  if (isPg) {
-    // Surface real schema-sync failures in production rather than hiding them.
+} catch (e) {
+  const isLocalDev = !process.env.CI && process.env.NODE_ENV !== 'production';
+  if (isPg || !isLocalDev) {
+    console.error('[postbuild] prisma db push failed:', e.message);
     process.exit(1);
   }
-  // SQLite in local dev: tolerate failures (matches original || true behaviour).
-  process.exit(0);
+  // SQLite + local dev only: warn but don't block (preserves original || true behaviour).
+  console.warn('[postbuild] prisma db push failed (tolerated in local dev):', e.message);
 }
